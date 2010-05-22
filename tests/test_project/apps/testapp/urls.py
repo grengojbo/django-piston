@@ -2,8 +2,7 @@ from django.conf.urls.defaults import *
 from piston.resource import Resource
 from piston.authentication import HttpBasicAuthentication, HttpBasicSimple
 
-from test_project.apps.testapp.handlers import EntryHandler, ExpressiveHandler, AbstractHandler, EchoHandler, PlainOldObjectHandler, Issue58Handler, ListFieldsHandler
-
+from test_project.apps.testapp.handlers import EntryHandler, ExpressiveHandler, AbstractHandler, EchoHandler, PlainOldObjectHandler, Issue58Handler, ListFieldsHandler, TestModelPaginatedCollectionBaseHandler, TestModelListPaginatedCollectionBaseHandler, TestModelCallablePaginatedCollectionBaseHandler, TestModelQuerysetPaginatedCollectionBaseHandler
 auth = HttpBasicAuthentication(realm='TestApplication')
 
 entries = Resource(handler=EntryHandler, authentication=auth)
@@ -13,6 +12,10 @@ echo = Resource(handler=EchoHandler)
 popo = Resource(handler=PlainOldObjectHandler)
 list_fields = Resource(handler=ListFieldsHandler)
 issue58 = Resource(handler=Issue58Handler)
+paginated = Resource(handler=TestModelPaginatedCollectionBaseHandler)
+paginated_list = Resource(handler=TestModelListPaginatedCollectionBaseHandler)
+paginated_callable = Resource(handler=TestModelCallablePaginatedCollectionBaseHandler)
+paginated_queryset = Resource(handler=TestModelQuerysetPaginatedCollectionBaseHandler)
 
 AUTHENTICATORS = [auth,]
 SIMPLE_USERS = (('admin', 'secr3t'),
@@ -53,6 +56,13 @@ urlpatterns = patterns('',
     url(r'^list_fields/(?P<id>.+)$', list_fields),
     
     url(r'^popo$', popo),
+    
+    # pagination tests
+    url(r'^paginated-named/(?P<start>\d+):(?P<count>\d+).json$', paginated), 
+    url(r'^paginated-query/models.json$', paginated), 
+    url(r'^paginated-list/(?P<start>\d+):(?P<count>\d+).json$', paginated_list), 
+    url(r'^paginated-callable/(?P<start>\d+):(?P<count>\d+).json$', paginated_callable), 
+    url(r'^paginated-queryset/(?P<start>\d+):(?P<count>\d+).json$', paginated_queryset),
 )
 
 

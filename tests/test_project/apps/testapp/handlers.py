@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator
 
-from piston.handler import BaseHandler
+from piston.handler import BaseHandler, PaginatedCollectionBaseHandler
 from piston.utils import rc, validate
 
 from models import TestModel, ExpressiveTestModel, Comment, InheritedModel, PlainOldObject, Issue58Model, ListFieldsModel
@@ -95,3 +95,19 @@ class Issue58Handler(BaseHandler):
             return rc.CREATED
         else:
             super(Issue58Model, self).create(request)
+
+class TestModelPaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
+    model = ExpressiveTestModel
+
+class TestModelListPaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
+    resources = [{"name":"list", "n":n} for n in range(0,21)]
+
+class TestModelQuerysetPaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
+    model = ExpressiveTestModel
+    resources = ExpressiveTestModel.objects.filter(id__lt=21)
+
+def get_resources(handler):
+    return ExpressiveTestModel.objects.filter(id__lt=22)
+    
+class TestModelCallablePaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
+    resources = get_resources

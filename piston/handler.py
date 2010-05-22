@@ -3,6 +3,7 @@ import warnings
 from utils import rc
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.conf import settings
+from django.db.models.query import QuerySet
 
 typemapper = { }
 handler_tracker = [ ]
@@ -154,3 +155,101 @@ class AnonymousBaseHandler(BaseHandler):
     """
     is_anonymous = True
     allowed_methods = ('GET',)
+
+class PaginatedCollectionBaseHandler(BaseHandler):
+    """
+    A handler for paginated queries. Allows for configurable offset (start)
+    and count on the url itself. Does limit the maximum number of objects to be fetched 
+    in order not to overload the server if a client asks for way to many resources.
+    Uses the Atom Publication Protocol suggestion of having next and previous 
+    information as links.
+    Furthermore, if you want to further filter the QuerySet, you can set the 'resources'
+    property to the desired queryset.
+    """
+    # the maximum number of resources  per request, to avoid
+    # bringing the server down
+    max_resources_per_page = 20
+    resource_name = None
+    resources = None
+    model = None 
+    def read(self, request,  start = None, limit=None):
+        '''
+        Prepares a response with the queryset objects, a next and previous link 
+        and a total count of items
+        '''
+        from django.core.urlresolvers import resolve, reverse
+        from urllib import urlencode
+        # use request.GET as a fallback for start and count:
+        slices_in_querystring=False
+        if start is None:
+            slices_in_querystring = True
+            try:
+                start = request.GET["start"]
+            except KeyError:
+                raise KeyError("Paginated resources must be passed a 'start' parameter.")
+        if limit is None:
+            limit = request.GET.get("limit", PaginatedCollectionBaseHandler.max_resources_per_page)
+        # just make sure we have ints, and no insane values 
+        start = int(start)
+        limit = min(int(limit), PaginatedCollectionBaseHandler.max_resources_per_page)
+        if self.resource_name is None:
+            if self.model:
+                resource_name = unicode(self.model._meta.verbose_name_plural)
+            else:
+                resource_name = "resource"
+        # find out what resources to use, e model (then a queryset), a callable or a regular sequence
+        # and also how to count the total number of objects (qs.count vs regular len(seq)
+        resources = self.resources
+        if resources is None:
+            resources = self.model.objects.all() 
+            total = self.model.objects.count()
+        elif callable(resources):
+            resources = resources()
+            total = len(resources)
+        elif isinstance(resources, QuerySet):
+            total = resources.count()
+        else:
+            #print "in len"
+            total = len (resources)
+        # the queryset proper
+        end = min (total, start + count)
+        # in order to generate next and previous links, 
+        # we need to reverse the url and resolve again
+        # with the new limits
+        view, args, kwargs =  resolve(request.path)
+        next_start = start + limit
+        next_end = min (total, next_start + limit)
+        # reverse urls ignore the querystring so we must reconstruct those
+        if slices_in_querystring:
+            query_dict = dict([part.split('=') for part in request.META["QUERY_STRING"].split('&')]) 
+        # figure out next links
+        if next_start >= total:
+            next = ""
+        else:
+            if slices_in_querystring is False:
+                kwargs["start"] = next_start
+            next = request.build_absolute_uri(reverse(view, None, args, kwargs))
+            if slices_in_querystring:
+                query_dict["start"] = next_start
+                new_query = urlencode(query_dict)
+                next = "%s?%s" % (next,new_query)
+
+
+        if start - limit >= 0:
+            if slices_in_querystring is False:
+                kwargs["start"] = start - limit
+            previous = request.build_absolute_uri(reverse(view, None, args, kwargs))
+            if slices_in_querystring:
+                query_dict["start"] = start - limit
+                new_query = urlencode(query_dict)
+                previous = "%s?%s" % (previous,new_query)
+        else:
+            previous = ""
+
+        data = {}
+
+        data[resource_name] =  resources[start:end]
+        data["next"] = next
+        data["previous"] = previous
+        data["count"]  = total
+        return data
