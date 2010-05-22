@@ -1,6 +1,7 @@
 syntax: glob
 *.egg
 *.pyc
+*.kpf
 build
 dist
 django_piston.egg-info
