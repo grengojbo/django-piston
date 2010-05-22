@@ -21,7 +21,7 @@ class HandlerMetaClass(type):
                 if model == m and anon == a:
                     return k
 
-        if hasattr(new_cls, 'model'):
+        if hasattr(new_cls, 'model') and new_cls.model is not None:
             if already_registered(new_cls.model, new_cls.is_anonymous):
                 if not getattr(settings, 'PISTON_IGNORE_DUPE_MODELS', False):
                     warnings.warn("Handler already registered for model %s, "
