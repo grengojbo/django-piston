@@ -4,6 +4,9 @@ from utils import rc
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.conf import settings
 from django.db.models.query import QuerySet
+import logging
+
+log = logging.getLogger('piston.handler')
 
 typemapper = { }
 handler_tracker = [ ]
@@ -31,7 +34,7 @@ class HandlerMetaClass(type):
         else:
             typemapper[new_cls] = (None, new_cls.is_anonymous)
 
-        if name not in ('BaseHandler', 'AnonymousBaseHandler'):
+        if name not in ('BaseHandler', 'AnonymousBaseHandler', 'PaginatedCollectionBaseHandler'):
             handler_tracker.append(new_cls)
 
         return new_cls
@@ -79,6 +82,7 @@ class BaseHandler(object):
             return False
 
     def read(self, request, *args, **kwargs):
+        log.debug("BaseHandler")
         if not self.has_model():
             return rc.NOT_IMPLEMENTED
 
@@ -168,35 +172,35 @@ class PaginatedCollectionBaseHandler(BaseHandler):
     """
     # the maximum number of resources  per request, to avoid
     # bringing the server down
-    max_resources_per_page = 20
+    max_resources_per_page = 2
     resource_name = None
     resources = None
     model = None
-    def read(self, request,  start = None, limit=None):
-        '''
-        Prepares a response with the queryset objects, a next and previous link
-        and a total count of items
-        '''
+    limit = None
+      
+    def read(self, request, *args, **kwargs):
+        log.debug("PaginatedCollectionBaseHandler -> read")
         from django.core.urlresolvers import resolve, reverse
         from urllib import urlencode
         # use request.GET as a fallback for start and count:
-        slices_in_querystring=False
-        if start is None:
-            slices_in_querystring = True
-            try:
-                start = request.GET["start"]
-            except KeyError:
-                raise KeyError("Paginated resources must be passed a 'start' parameter.")
-        if limit is None:
-            limit = request.GET.get("limit", PaginatedCollectionBaseHandler.max_resources_per_page)
-        # just make sure we have ints, and no insane values
+        slices_in_querystring=True
+        try:
+            if start is None:
+                slices_in_querystring = False     
+        except:
+            start = request.GET.get("start", "0")
         start = int(start)
-        limit = min(int(limit), PaginatedCollectionBaseHandler.max_resources_per_page)
+        try:
+            if limit is None:
+                limit = min(int(limit), PaginatedCollectionBaseHandler.max_resources_per_page)
+        except:
+            limit = int(request.GET.get("limit", PaginatedCollectionBaseHandler.max_resources_per_page))
+        log.debug("start %i limit %i" % (start, limit))
         if self.resource_name is None:
             if self.model:
-                resource_name = unicode(self.model._meta.verbose_name_plural)
+                self.resource_name = unicode(self.model._meta.verbose_name_plural)
             else:
-                resource_name = "resource"
+                self.resource_name = "resource"
         # find out what resources to use, e model (then a queryset), a callable or a regular sequence
         # and also how to count the total number of objects (qs.count vs regular len(seq)
         resources = self.resources
@@ -209,19 +213,22 @@ class PaginatedCollectionBaseHandler(BaseHandler):
         elif isinstance(resources, QuerySet):
             total = resources.count()
         else:
-            #print "in len"
             total = len (resources)
         # the queryset proper
-        end = min (total, start + count)
+        end = min (total, start + limit)
         # in order to generate next and previous links,
         # we need to reverse the url and resolve again
         # with the new limits
         view, args, kwargs =  resolve(request.path)
+        #log.debug("view=%s, args=%s, kwargs=%s" % resolve(request.path))
         next_start = start + limit
         next_end = min (total, next_start + limit)
         # reverse urls ignore the querystring so we must reconstruct those
-        if slices_in_querystring:
-            query_dict = dict([part.split('=') for part in request.META["QUERY_STRING"].split('&')])
+        try:
+            if slices_in_querystring:
+                query_dict = dict([part.split('=') for part in request.META["QUERY_STRING"].split('&')])
+        except:
+            query_dict = dict()
         # figure out next links
         if next_start >= total:
             next = ""
@@ -234,7 +241,6 @@ class PaginatedCollectionBaseHandler(BaseHandler):
                 new_query = urlencode(query_dict)
                 next = "%s?%s" % (next,new_query)
 
-
         if start - limit >= 0:
             if slices_in_querystring is False:
                 kwargs["start"] = start - limit
@@ -245,11 +251,24 @@ class PaginatedCollectionBaseHandler(BaseHandler):
                 previous = "%s?%s" % (previous,new_query)
         else:
             previous = ""
-
         data = {}
-
-        data[resource_name] =  resources[start:end]
+        data[self.resource_name] = resources[start:end]
         data["next"] = next
         data["previous"] = previous
         data["count"]  = total
+        log.debug(data)
         return data
+        #try:
+            #data = {}
+            #data[self.resource_name] = resources[start:end]
+            #data["next"] = next
+            #data["previous"] = previous
+            #data["count"]  = total
+            #log.debug(data)
+            #return data
+        #except ObjectDoesNotExist:
+            #return rc.NOT_FOUND
+        #except MultipleObjectsReturned: # should never happen, since we're using a PK
+            #return rc.BAD_REQUEST
+        
+        
