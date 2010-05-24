@@ -159,9 +159,9 @@ class AnonymousBaseHandler(BaseHandler):
 class PaginatedCollectionBaseHandler(BaseHandler):
     """
     A handler for paginated queries. Allows for configurable offset (start)
-    and count on the url itself. Does limit the maximum number of objects to be fetched 
+    and count on the url itself. Does limit the maximum number of objects to be fetched
     in order not to overload the server if a client asks for way to many resources.
-    Uses the Atom Publication Protocol suggestion of having next and previous 
+    Uses the Atom Publication Protocol suggestion of having next and previous
     information as links.
     Furthermore, if you want to further filter the QuerySet, you can set the 'resources'
     property to the desired queryset.
@@ -171,10 +171,10 @@ class PaginatedCollectionBaseHandler(BaseHandler):
     max_resources_per_page = 20
     resource_name = None
     resources = None
-    model = None 
+    model = None
     def read(self, request,  start = None, limit=None):
         '''
-        Prepares a response with the queryset objects, a next and previous link 
+        Prepares a response with the queryset objects, a next and previous link
         and a total count of items
         '''
         from django.core.urlresolvers import resolve, reverse
@@ -189,7 +189,7 @@ class PaginatedCollectionBaseHandler(BaseHandler):
                 raise KeyError("Paginated resources must be passed a 'start' parameter.")
         if limit is None:
             limit = request.GET.get("limit", PaginatedCollectionBaseHandler.max_resources_per_page)
-        # just make sure we have ints, and no insane values 
+        # just make sure we have ints, and no insane values
         start = int(start)
         limit = min(int(limit), PaginatedCollectionBaseHandler.max_resources_per_page)
         if self.resource_name is None:
@@ -201,7 +201,7 @@ class PaginatedCollectionBaseHandler(BaseHandler):
         # and also how to count the total number of objects (qs.count vs regular len(seq)
         resources = self.resources
         if resources is None:
-            resources = self.model.objects.all() 
+            resources = self.model.objects.all()
             total = self.model.objects.count()
         elif callable(resources):
             resources = resources()
@@ -213,7 +213,7 @@ class PaginatedCollectionBaseHandler(BaseHandler):
             total = len (resources)
         # the queryset proper
         end = min (total, start + count)
-        # in order to generate next and previous links, 
+        # in order to generate next and previous links,
         # we need to reverse the url and resolve again
         # with the new limits
         view, args, kwargs =  resolve(request.path)
@@ -221,7 +221,7 @@ class PaginatedCollectionBaseHandler(BaseHandler):
         next_end = min (total, next_start + limit)
         # reverse urls ignore the querystring so we must reconstruct those
         if slices_in_querystring:
-            query_dict = dict([part.split('=') for part in request.META["QUERY_STRING"].split('&')]) 
+            query_dict = dict([part.split('=') for part in request.META["QUERY_STRING"].split('&')])
         # figure out next links
         if next_start >= total:
             next = ""
