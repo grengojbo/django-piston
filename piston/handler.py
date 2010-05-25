@@ -172,7 +172,7 @@ class PaginatedCollectionBaseHandler(BaseHandler):
     """
     # the maximum number of resources  per request, to avoid
     # bringing the server down
-    max_resources_per_page = 2
+    max_resources_per_page = 20
     resource_name = None
     resources = None
     model = None
