@@ -17,7 +17,7 @@ Simply run this script in a directory containing a buildout.cfg.
 The script accepts buildout command-line options, so you can
 use the -c option to specify an alternate configuration file.
 
-$Id$
+$Id: bootstrap.py,v 96b8eeaaf806 2009/05/08 11:02:17 zerok $
 """
 
 import os, shutil, sys, tempfile, urllib2

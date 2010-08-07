@@ -423,6 +423,21 @@ class ListFieldsTest(MainTests):
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(resp.content, expect)
         
+class ErrorHandlingTests(MainTests):
+    """Test proper handling of errors by Resource"""
+
+    def test_response_not_allowed(self):
+        resp = self.client.post('/api/echo')
+        self.assertEquals(resp.status_code, 405)
+        self.assertEquals(resp['Allow'], 'GET, HEAD')
+
+    def test_not_found_because_of_unexpected_http_method(self):
+        # not using self.client.head because it is not present in Django 1.0
+        resp = self.client.get('/api/echo', REQUEST_METHOD='HEAD')
+        self.assertEquals(resp.status_code, 404)
+        self.assertEquals(resp.content, '')
+
+
 class Issue58ModelTests(MainTests):
     """
     This testcase addresses #58 in django-piston where if a model
@@ -458,215 +473,3 @@ class Issue58ModelTests(MainTests):
         resp = self.client.post('/api/issue58.json', outgoing, content_type='application/json',
                                 HTTP_AUTHORIZATION=self.auth_string)
         self.assertEquals(resp.status_code, 201)
-
-class NamedPaginationTest(TestCase):
-    def setUp(self):
-        for i in range(0, 30):
-            content = "%03d" % i
-            model = ExpressiveTestModel(title="title %s" % content, content="content %s" % content)
-            model.save()
-
-    def tearDown(self):
-        ExpressiveTestModel.objects.all().delete()
-
-    def test_named_url(self):
-        resp = self.client.get("/api/paginated-named/0:10.json")
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(10, len (data["expressive test models"]))
-        models = data["expressive test models"]
-        model1 = models[0]
-        model_last = models[-1]
-        self.assertEquals(u"title 000", model1['title'])
-        self.assertEquals(u"title 009", model_last['title'])
-        self.assertEquals("http://testserver/api/paginated-named/10:10.json", data["next"])
-        self.assertEquals("", data["previous"])
-
-    def test_page2(self):
-        resp = self.client.get("/api/paginated-named/10:10.json")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(10, len (data["expressive test models"]))
-        models = data["expressive test models"]
-        model1 = models[0]
-        model_last = models[-1]
-        self.assertEquals(u"title 010", model1['title'])
-        self.assertEquals(u"title 019", model_last['title'])
-        self.assertEquals("http://testserver/api/paginated-named/20:10.json", data["next"])
-        self.assertEquals("http://testserver/api/paginated-named/0:10.json", data["previous"])
-
-    def test_low_values(self):
-        resp = self.client.get("/api/paginated-named/-10:10.json")
-        self.assertEquals(resp.status_code, 404)
-
-
-    def test_count_limit(self):
-        resp = self.client.get("/api/paginated-named/0:90.json")
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(20, len (data["expressive test models"]))
-
-    def test_high_values(self):
-        resp = self.client.get("/api/paginated-named/40:10.json")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(0, len (data["expressive test models"]))
-
-class QueryStringParemetersPaginationTest(TestCase):
-    def setUp(self):
-        for i in range(0, 30):
-            content = "%03d" % i
-            model = ExpressiveTestModel(title="title %s" % content, content="content %s" % content)
-            model.save()
-
-    def tearDown(self):
-        ExpressiveTestModel.objects.all().delete()
-
-    def test_page_1(self):
-        from urlparse import parse_qs, urlparse
-        resp = self.client.get("/api/paginated-query/models.json?start=0&limit=10")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(10, len (data["expressive test models"]))
-        models = data["expressive test models"]
-        model1 = models[0]
-        model_last = models[-1]
-        self.assertEquals(u"title 000", model1['title'])
-        self.assertEquals(u"title 009", model_last['title'])
-        next_query_string = urlparse(data['next'])[4]
-        next_link_qs = parse_qs(next_query_string)
-        self.assertEquals(next_link_qs["start"][0] , "10")
-        self.assertEquals(next_link_qs["limit"][0] , "10")
-
-        self.assertEquals("", data["previous"])
-
-    def test_page2(self):
-        from urlparse import parse_qs, urlparse
-        # add a dummy qs to make sure additional pair are not lost
-        resp = self.client.get("/api/paginated-query/models.json?start=10&limit=10&foo=bar%20bar")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(10, len (data["expressive test models"]))
-        models = data["expressive test models"]
-        model1 = models[0]
-        model_last = models[-1]
-        self.assertEquals(u"title 010", model1['title'])
-        next_query_string = urlparse(data['next'])[4]
-        next_link_qs = parse_qs(next_query_string)
-        self.assertEquals(next_link_qs["start"][0] , "20")
-        self.assertEquals(next_link_qs["limit"][0] , "10")
-        self.assertEquals(next_link_qs["foo"][0] , "bar%20bar")
-
-        prev_query_string = urlparse(data['previous'])[4]
-        prev_link_qs = parse_qs(prev_query_string)
-        self.assertEquals(prev_link_qs["start"][0] , "0")
-        self.assertEquals(prev_link_qs["limit"][0] , "10")
-
-class ListResourcePaginationTest(TestCase):
-    def test_correct_total(self): 
-        resp = self.client.get("/api/paginated-list/0:10.json")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(21, data[ "count" ])
-
-class CallableResourcePaginationTest(TestCase):
-    def setUp(self):
-        for i in range(0, 30):
-            content = "%03d" % i
-            model = ExpressiveTestModel(title="title %s" % content, content="content %s" % content)
-            model.save()
-    def test_correct_total(self): 
-        resp = self.client.get("/api/paginated-callable/0:10.json")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(21, data[ "count" ])
-
-class QuerysetResourcePaginationTest(TestCase):
-    def setUp(self):
-        for i in range(0, 30):
-            content = "%03d" % i
-            model = ExpressiveTestModel(title="title %s" % content, content="content %s" % content)
-
-    def tearDown(self):
-        ExpressiveTestModel.objects.all().delete()
-
-    def test_page_1(self):
-        from urlparse import parse_qs, urlparse
-        resp = self.client.get("/api/paginated-query/models.json?start=0&limit=10")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(10, len (data["expressive test models"]))
-        models = data["expressive test models"]
-        model1 = models[0]
-        model_last = models[-1]
-        self.assertEquals(u"title 000", model1['title'])
-        self.assertEquals(u"title 009", model_last['title'])
-        next_query_string = urlparse(data['next'])[4]
-        next_link_qs = parse_qs(next_query_string)
-        self.assertEquals(next_link_qs["start"][0] , "10")
-        self.assertEquals(next_link_qs["limit"][0] , "10")
-
-        self.assertEquals("", data["previous"])
-
-    def test_page2(self):
-        from urlparse import parse_qs, urlparse
-        # add a dummy qs to make sure additional pair are not lost
-        resp = self.client.get("/api/paginated-query/models.json?start=10&limit=10&foo=bar%20bar")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(30, data["count"])
-        self.assertEquals(10, len (data["expressive test models"]))
-        models = data["expressive test models"]
-        model1 = models[0]
-        model_last = models[-1]
-        self.assertEquals(u"title 010", model1['title'])
-        next_query_string = urlparse(data['next'])[4]
-        next_link_qs = parse_qs(next_query_string)
-        self.assertEquals(next_link_qs["start"][0] , "20")
-        self.assertEquals(next_link_qs["limit"][0] , "10")
-        self.assertEquals(next_link_qs["foo"][0] , "bar%20bar")
-
-        prev_query_string = urlparse(data['previous'])[4]
-        prev_link_qs = parse_qs(prev_query_string)
-        self.assertEquals(prev_link_qs["start"][0] , "0")
-        self.assertEquals(prev_link_qs["limit"][0] , "10")
-
-class ListResourcePaginationTest(TestCase):
-    def test_correct_total(self): 
-        resp = self.client.get("/api/paginated-list/0:10.json")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(21, data[ "count" ])
-
-class CallableResourcePaginationTest(TestCase):
-    def setUp(self):
-        for i in range(0, 30):
-            content = "%03d" % i
-            model = ExpressiveTestModel(title="title %s" % content, content="content %s" % content)
-            model.save()
-    def test_correct_total(self): 
-        resp = self.client.get("/api/paginated-callable/0:10.json")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(21, data[ "count" ])
-
-class QuerysetResourcePaginationTest(TestCase):
-    def setUp(self):
-        for i in range(0, 30):
-            content = "%03d" % i
-            model = ExpressiveTestModel(title="title %s" % content, content="content %s" % content)
-            model.save()
-
-    def tearDown(self):
-        ExpressiveTestModel.objects.all().delete()
-
-    def test_correct_total(self): 
-        resp = self.client.get("/api/paginated-queryset/0:10.json")
-        self.assertEquals(resp.status_code, 200)
-        data = simplejson.loads(resp.content)
-        self.assertEquals(20, data[ "count" ])

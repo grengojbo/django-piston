@@ -12,7 +12,7 @@ import os
 
 setup(
     name = "django-piston",
-    version = "0.2.3.1",
+    version = "0.2.3.2",
     url = 'http://bitbucket.org/jespern/django-piston/wiki/Home',
 	download_url = 'http://bitbucket.org/jespern/django-piston/downloads/',
     license = 'BSD',
@@ -20,6 +20,7 @@ setup(
     author = 'Jesper Noehr',
     author_email = 'jesper@noehr.org',
     packages = find_packages(),
+    namespace_packages = ['piston'],
     include_package_data = True,
     zip_safe = False,
     classifiers = [

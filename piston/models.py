@@ -4,7 +4,10 @@ import urllib, time, urlparse
 from django.db.models.signals import post_save, post_delete
 from django.db import models
 from django.contrib.auth.models import User
+<<<<<<< HEAD
 from django.contrib import admin
+=======
+>>>>>>> fae3ffe4dc6ccb3746cc4e99ea8563572cda2b76
 from django.core.mail import send_mail, mail_admins
 
 # Piston imports
@@ -33,7 +36,10 @@ class Nonce(models.Model):
     def __unicode__(self):
         return u"Nonce %s for %s" % (self.key, self.consumer_key)
 
+<<<<<<< HEAD
 admin.site.register(Nonce)
+=======
+>>>>>>> fae3ffe4dc6ccb3746cc4e99ea8563572cda2b76
 
 class Consumer(models.Model):
     name = models.CharField(max_length=255)
@@ -71,7 +77,10 @@ class Consumer(models.Model):
         self.secret = secret
         self.save()
 
+<<<<<<< HEAD
 admin.site.register(Consumer)
+=======
+>>>>>>> fae3ffe4dc6ccb3746cc4e99ea8563572cda2b76
 
 class Token(models.Model):
     REQUEST = 1
@@ -142,8 +151,7 @@ class Token(models.Model):
             self.callback = callback
             self.callback_confirmed = True
             self.save()
-        
-admin.site.register(Token)
+
 
 # Attach our signals
 post_save.connect(consumer_post_save, sender=Consumer)

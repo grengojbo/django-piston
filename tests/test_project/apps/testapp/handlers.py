@@ -70,7 +70,7 @@ class PlainOldObjectHandler(BaseHandler):
         return self.model()
 
 class EchoHandler(BaseHandler):
-    allowed_methods = ('GET', )
+    allowed_methods = ('GET', 'HEAD')
 
     @validate(EchoForm, 'GET')
     def read(self, request):
@@ -110,4 +110,3 @@ def get_resources(handler):
     return ExpressiveTestModel.objects.filter(id__lt=22)
     
 class TestModelCallablePaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
-    resources = get_resources
