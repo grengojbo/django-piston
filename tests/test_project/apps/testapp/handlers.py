@@ -96,17 +96,8 @@ class Issue58Handler(BaseHandler):
         else:
             super(Issue58Model, self).create(request)
 
-class TestModelPaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
-    model = ExpressiveTestModel
-
-class TestModelListPaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
-    resources = [{"name":"list", "n":n} for n in range(0,21)]
-
-class TestModelQuerysetPaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
-    model = ExpressiveTestModel
-    resources = ExpressiveTestModel.objects.filter(id__lt=21)
-
-def get_resources(handler):
-    return ExpressiveTestModel.objects.filter(id__lt=22)
+class JinjaHandler(BaseHandler):
+    allowed_methods = ('GET', 'HEAD',)
     
-class TestModelCallablePaginatedCollectionBaseHandler(PaginatedCollectionBaseHandler):
+    def read(self, request):
+        return {'template': 'context.txt', 'extra_context': {'a': 1, 'b': 2}}

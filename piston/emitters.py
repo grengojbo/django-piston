@@ -2,6 +2,10 @@ from __future__ import generators
 
 import decimal, re, inspect
 import copy
+try:
+    from djanjinja.views import render_to_string
+except:
+    pass
 
 try:
     # yaml isn't standard with python.  It shouldn't be required if it
@@ -171,8 +175,8 @@ class Emitter(object):
 
                     if not get_fields:
                         get_fields = set([ f.attname.replace("_id", "", 1)
-                            for f in data._meta.fields + data._meta.virtual_fields])
-                    
+                                           for f in data._meta.fields + data._meta.virtual_fields])
+
                     if hasattr(mapped, 'extra_fields'):
                         get_fields.update(mapped.extra_fields)
 
@@ -443,3 +447,13 @@ class DjangoEmitter(Emitter):
         return response
 
 Emitter.register('django', DjangoEmitter, 'text/xml; charset=utf-8')
+
+class JinjaEmitter(Emitter):
+    """
+    Emitter for the jinja2 templates.
+    """
+    def render(self, request, format='xml'):
+        response = self.construct()
+        return render_to_string(response.get('template'), response.get('extra_context'))
+
+Emitter.register('jinja', JinjaEmitter, 'text/xml; charset=utf-8')

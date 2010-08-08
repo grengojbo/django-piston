@@ -3,7 +3,7 @@ from piston.resource import Resource
 from piston.authentication import HttpBasicAuthentication, HttpBasicSimple
 from piston.authentication.oauth import OAuthAuthentication
 
-from test_project.apps.testapp.handlers import EntryHandler, ExpressiveHandler, AbstractHandler, EchoHandler, PlainOldObjectHandler, Issue58Handler, ListFieldsHandler
+from test_project.apps.testapp.handlers import EntryHandler, ExpressiveHandler, AbstractHandler, EchoHandler, PlainOldObjectHandler, Issue58Handler, ListFieldsHandler, JinjaHandler
 
 auth = HttpBasicAuthentication(realm='TestApplication')
 
@@ -14,10 +14,11 @@ echo = Resource(handler=EchoHandler)
 popo = Resource(handler=PlainOldObjectHandler)
 list_fields = Resource(handler=ListFieldsHandler)
 issue58 = Resource(handler=Issue58Handler)
-paginated = Resource(handler=TestModelPaginatedCollectionBaseHandler)
-paginated_list = Resource(handler=TestModelListPaginatedCollectionBaseHandler)
-paginated_callable = Resource(handler=TestModelCallablePaginatedCollectionBaseHandler)
-paginated_queryset = Resource(handler=TestModelQuerysetPaginatedCollectionBaseHandler)
+#paginated = Resource(handler=TestModelPaginatedCollectionBaseHandler)
+#paginated_list = Resource(handler=TestModelListPaginatedCollectionBaseHandler)
+#paginated_callable = Resource(handler=TestModelCallablePaginatedCollectionBaseHandler)
+#paginated_queryset = Resource(handler=TestModelQuerysetPaginatedCollectionBaseHandler)
+jinja = Resource(handler=JinjaHandler)
 
 AUTHENTICATORS = [auth,]
 SIMPLE_USERS = (('admin', 'secr3t'),
@@ -63,11 +64,14 @@ urlpatterns = patterns('',
     url(r'^popo$', popo),
     
     # pagination tests
-    url(r'^paginated-named/(?P<start>\d+):(?P<count>\d+).json$', paginated), 
-    url(r'^paginated-query/models.json$', paginated), 
-    url(r'^paginated-list/(?P<start>\d+):(?P<count>\d+).json$', paginated_list), 
-    url(r'^paginated-callable/(?P<start>\d+):(?P<count>\d+).json$', paginated_callable), 
-    url(r'^paginated-queryset/(?P<start>\d+):(?P<count>\d+).json$', paginated_queryset),
+    #url(r'^paginated-named/(?P<start>\d+):(?P<count>\d+).json$', paginated), 
+    #url(r'^paginated-query/models.json$', paginated), 
+    #url(r'^paginated-list/(?P<start>\d+):(?P<count>\d+).json$', paginated_list), 
+    #url(r'^paginated-callable/(?P<start>\d+):(?P<count>\d+).json$', paginated_callable), 
+    #url(r'^paginated-queryset/(?P<start>\d+):(?P<count>\d+).json$', paginated_queryset),
+    
+    # jinja
+    url(r'^jinja/$', jinja, {'emitter_format': 'jinja'}),
 )
 
 
