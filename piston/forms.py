@@ -1,7 +1,4 @@
-import hmac, base64
-
 from django import forms
-from django.conf import settings
 
 class Form(forms.Form):
     pass
