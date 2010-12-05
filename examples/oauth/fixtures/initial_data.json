@@ -1,0 +1,109 @@
+[
+    {
+  "pk": 1,
+  "model": "auth.user",
+  "fields": {
+   "username": "admin",
+   "first_name": "",
+   "last_name": "",
+   "is_active": true,
+   "is_superuser": true,
+   "is_staff": true,
+   "last_login": "2010-12-05 05:37:48",
+   "groups": [],
+   "user_permissions": [],
+   "password": "sha1$57c00$572af860190fbbbb1f81a04b6675e11d343c655a",
+   "email": "piston@example.com",
+   "date_joined": "2010-12-04 13:52:48"
+  }
+ },
+    {
+        "pk": 2,
+        "model": "auth.user",
+        "fields": {
+            "username": "testuser",
+            "first_name": "Piston",
+            "last_name": "User",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2009-08-03 13:11:53",
+            "groups": [],
+            "user_permissions": [],
+            "password": "sha1$97a04$0537e86889530ffd5c46a756fffbe0f745e4938e",
+            "email": "pistontestuser@example.com",
+            "date_joined": "2009-08-03 13:11:53"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "auth.user",
+        "fields": {
+            "username": "pistontestconsumer",
+            "first_name": "Piston",
+            "last_name": "Consumer",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2009-08-03 13:11:53",
+            "groups": [],
+            "user_permissions": [],
+            "password": "sha1$b6c1f$83d5879f3854f6e9d27f393e3bcb4b8db05cf671",
+            "email": "pistontestconsumer@example.com",
+            "date_joined": "2009-08-03 13:11:53"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "sites.site",
+        "fields": {
+            "domain": "example.com",
+            "name": "example.com"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "piston.consumer",
+        "fields": {
+            "status": "accepted",
+            "name": "Piston Test Consumer",
+            "secret": "T5XkNMkcjffDpC9mNQJbyQnJXGsenYbz",
+            "user": 2,
+            "key": "8aZSFj3W54h8J8sCpx",
+            "description": "A test consumer record for Piston unit tests."
+        }
+    },
+    {
+        "pk": 1,
+        "model": "piston.token",
+        "fields": {
+            "is_approved": true,
+            "timestamp": 1249347414,
+            "token_type": 2,
+            "secret": "qSWZq36t7yvkBquetYBkd8JxnuCu9jKk",
+            "user": 2,
+            "key": "Y7358vL5hDBbeP3HHL",
+            "consumer": 1
+        }
+    },
+ {
+  "pk": 1, 
+  "model": "blog.blogpost", 
+  "fields": {
+   "content": "This is just a sample post.", 
+   "created_on": "2009-04-27 04:55:23", 
+   "author": 1, 
+   "title": "Sample blogpost 1"
+  }
+ }, 
+ {
+  "pk": 2, 
+  "model": "blog.blogpost", 
+  "fields": {
+   "content": "This is yet another sample post.", 
+   "created_on": "2009-04-27 04:55:33", 
+   "author": 1, 
+   "title": "Another sample post"
+  }
+ }
+]

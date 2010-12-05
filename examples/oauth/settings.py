@@ -1,8 +1,8 @@
 import os, sys
 
-OAUTH_AUTH_VIEW = "piston.authentication.oauth_auth_view"
-OAUTH_CALLBACK_VIEW = "piston.authentication.oauth_user_auth"
-
+#OAUTH_AUTH_VIEW = "piston.authentication.oauth_auth_view"
+#OAUTH_CALLBACK_VIEW = "piston.authentication.oauth_user_auth"
+DJANGO_SETTINGS_MODULE = 'settings'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -17,10 +17,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Fix up piston imports here. We would normally place piston in 
 # a directory accessible via the Django app, but this is an
 # example and we ship it a couple of directories up.
-sys.path.insert(0, os.path.join(BASE_DIR, '../../'))
+sys.path.insert(0, BASE_DIR)
 
 DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = os.path.join(BASE_DIR, 'db')             # Or path to database file if using sqlite3.
+DATABASE_NAME = os.path.join(BASE_DIR, 'test.db')             # Or path to database file if using sqlite3.
 #DATABASE_USER = ''             # Not used with sqlite3.
 #DATABASE_PASSWORD = ''         # Not used with sqlite3.
 #DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -68,8 +68,10 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'piston.middleware.ConditionalMiddlewareCompatProxy',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'piston.middleware.CommonMiddlewareCompatProxy',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 

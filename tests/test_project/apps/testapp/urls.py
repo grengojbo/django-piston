@@ -1,8 +1,8 @@
 from django.conf.urls.defaults import *
 from piston.resource import Resource
 from piston.authentication import HttpBasicAuthentication, HttpBasicSimple
-from piston.authentication.oauth import OAuthAuthentication
-from test_project.apps.testapp.handlers import EntryHandler, ExpressiveHandler, AbstractHandler, EchoHandler, PlainOldObjectHandler, Issue58Handler, ListFieldsHandler, TestModelPaginatedCollectionBaseHandler, TestModelListPaginatedCollectionBaseHandler, TestModelCallablePaginatedCollectionBaseHandler, TestModelQuerysetPaginatedCollectionBaseHandler, JinjaHandler
+
+from test_project.apps.testapp.handlers import EntryHandler, ExpressiveHandler, AbstractHandler, EchoHandler, PlainOldObjectHandler, Issue58Handler, ListFieldsHandler
 
 auth = HttpBasicAuthentication(realm='TestApplication')
 
@@ -32,9 +32,6 @@ for username, password in SIMPLE_USERS:
 multiauth = Resource(handler=PlainOldObjectHandler, 
                         authentication=AUTHENTICATORS)
 
-ouath_two_legged_api = Resource(handler=EchoHandler, authentication=OAuthAuthentication(realm='TestApplication', two_legged=True))
-ouath_three_legged_api = Resource(handler=EchoHandler, authentication=OAuthAuthentication(realm='TestApplication'))
-
 urlpatterns = patterns('',
     url(r'^entries/$', entries),
     url(r'^entries/(?P<pk>.+)/$', entries),
@@ -52,10 +49,10 @@ urlpatterns = patterns('',
 
     url(r'^multiauth/$', multiauth),
 
-    # OAuth
-    url(r'^oauth/', include('piston.authentication.oauth.urls')),
-    url(r'^oauth/two_legged_api$', ouath_two_legged_api),
-    url(r'^oauth/three_legged_api$', ouath_three_legged_api),
+    # oauth entrypoints
+    url(r'^oauth/request_token$', 'piston.authentication.oauth_request_token'),
+    url(r'^oauth/authorize$', 'piston.authentication.oauth_user_auth'),
+    url(r'^oauth/access_token$', 'piston.authentication.oauth_access_token'),
 
     url(r'^list_fields$', list_fields),
     url(r'^list_fields/(?P<id>.+)$', list_fields),

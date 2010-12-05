@@ -1,0 +1,6 @@
+django
+httplib2
+twisted
+git+git://github.com/simplegeo/python-oauth2.git
+oauth-proxy
+-e git://github.com/grengojbo/django-piston.git#egg=django-piston
