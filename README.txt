@@ -42,7 +42,5 @@ Running Client
     # make sure "oauth_client.py" has correct hostname
     $ python oauth_client.py #create new token/secret, put "oauth_token" link in browser, "what is PIN? aka 'oauth_verifier'"
 
-====
-Code
-====
+
 

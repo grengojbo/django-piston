@@ -13,8 +13,8 @@ ACCESS_TOKEN_URL = 'http://%s:%s/api/oauth/access_token/' % (CONSUMER_SERVER, CO
 AUTHORIZE_URL = 'http://%s:%s/api/oauth/authorize/' % (CONSUMER_SERVER, CONSUMER_PORT)
 
 # key and secret granted by the service provider for this consumer application - same as the MockOAuthDataStore
-CONSUMER_KEY = 'testkey'
-CONSUMER_SECRET = 'testsecret'
+CONSUMER_KEY = '8aZSFj3W54h8J8sCpx'
+CONSUMER_SECRET = 'T5XkNMkcjffDpC9mNQJbyQnJXGsenYbz'
 
 
 consumer = oauth.Consumer(CONSUMER_KEY, CONSUMER_SECRET)

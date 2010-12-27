@@ -142,7 +142,7 @@ class Token(models.Model):
             self.callback = callback
             self.callback_confirmed = True
             self.save()
-
+admin.site.register(Token)
 
 # Attach our signals
 post_save.connect(consumer_post_save, sender=Consumer)

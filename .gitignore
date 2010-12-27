@@ -1,5 +1,6 @@
 www/media/admin/
 settings_local.py
+examples/oauth/.cache/
 *.tar
 *.tar.gz
 *.tar.bz2

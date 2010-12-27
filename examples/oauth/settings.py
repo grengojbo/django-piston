@@ -1,7 +1,8 @@
 import os, sys
 
-#OAUTH_AUTH_VIEW = "piston.authentication.oauth_auth_view"
-#OAUTH_CALLBACK_VIEW = "piston.authentication.oauth_user_auth"
+OAUTH_AUTH_VIEW = "piston.authentication.oauth_auth_view"
+OAUTH_CALLBACK_VIEW = "piston.authentication.oauth_user_auth"
+#OAUTH_CALLBACK_VIEW = "piston.authentication.oauth_auth_view"
 DJANGO_SETTINGS_MODULE = 'settings'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -79,17 +80,17 @@ ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
-    os.path.join(BASE_DIR, 'piston/templates'),
+    #os.path.join(BASE_DIR, 'piston/templates'),
 )
 
 INSTALLED_APPS = (
+    'piston',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.markup',
-    'piston',
     'blog',
     'api',
 )

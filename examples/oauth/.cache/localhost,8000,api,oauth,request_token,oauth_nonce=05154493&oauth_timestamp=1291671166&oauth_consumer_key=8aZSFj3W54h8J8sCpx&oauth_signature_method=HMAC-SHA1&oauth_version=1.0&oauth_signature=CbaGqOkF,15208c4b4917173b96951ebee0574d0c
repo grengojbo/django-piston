@@ -1,0 +1,8 @@
+status: 200
+content-length: 112
+content-location: http://localhost:8000/api/oauth/request_token/?oauth_nonce=05154493&oauth_timestamp=1291671166&oauth_consumer_key=8aZSFj3W54h8J8sCpx&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_signature=CbaGqOkFUXlrqKeZLcYoUnU%2Fq9U%3D
+server: WSGIServer/0.1 Python/2.6.5
+date: Mon, 06 Dec 2010 21:32:46 GMT
+content-type: text/html; charset=utf-8
+
+oauth_token_secret=vwxAMMbey2EdJEk4RGVGUGxSLWdcpRTv&oauth_token=MEuvJbTaVaZ2AuJhvu&oauth_callback_confirmed=true
